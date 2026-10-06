@@ -65,19 +65,38 @@ export type PhoneSimOptions = {
   clipG: number | null;
 };
 
+/** Versão em fluxo (amostra a amostra) da simulação do celular; mantém o estado entre chamadas. */
+export class PhoneSimStream {
+  private readonly factor: number;
+  private readonly f: Butter4[];
+  private i = 0;
+  constructor(private readonly o: PhoneSimOptions) {
+    this.factor = Math.round(o.fsIn / o.fsOut);
+    if (Math.abs(this.factor * o.fsOut - o.fsIn) > 1e-9) throw new Error(`fsIn ${o.fsIn} não é múltiplo de fsOut ${o.fsOut}`);
+    const fc = o.cutoffHz ?? 0.4 * o.fsOut;
+    this.f = [0, 1, 2].map(() => new Butter4(fc, o.fsIn));
+  }
+  /** Devolve a amostra decimada correspondente, ou null se ela foi descartada. */
+  push(s: Sample): Sample | null {
+    const ax = this.f[0].apply(s.ax);
+    const ay = this.f[1].apply(s.ay);
+    const az = this.f[2].apply(s.az);
+    const keep = this.i % this.factor === 0;
+    this.i++;
+    if (!keep) return null;
+    const c = this.o.clipG;
+    const clip = (x: number) => (c == null ? x : Math.max(-c, Math.min(c, x)));
+    return { t: s.t, ax: clip(ax), ay: clip(ay), az: clip(az) };
+  }
+}
+
 /** Anti-aliasing (Butterworth 4ª ordem causal) + decimação + saturação. */
 export function phoneSim(samples: Sample[], o: PhoneSimOptions): Sample[] {
-  const factor = Math.round(o.fsIn / o.fsOut);
-  if (Math.abs(factor * o.fsOut - o.fsIn) > 1e-9) throw new Error(`fsIn ${o.fsIn} não é múltiplo de fsOut ${o.fsOut}`);
-  const fc = o.cutoffHz ?? 0.4 * o.fsOut;
-  const f = [0, 1, 2].map(() => new Butter4(fc, o.fsIn));
-  const clip = (x: number) => (o.clipG == null ? x : Math.max(-o.clipG, Math.min(o.clipG, x)));
+  const st = new PhoneSimStream(o);
   const out: Sample[] = [];
-  samples.forEach((s, i) => {
-    const ax = f[0].apply(s.ax);
-    const ay = f[1].apply(s.ay);
-    const az = f[2].apply(s.az);
-    if (i % factor === 0) out.push({ t: s.t, ax: clip(ax), ay: clip(ay), az: clip(az) });
-  });
+  for (const s of samples) {
+    const r = st.push(s);
+    if (r) out.push(r);
+  }
   return out;
 }

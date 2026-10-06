@@ -145,6 +145,53 @@ Fontes de cada evidência:
 - Sensor DynaPort MiniMod no cinto lombar, faixa de ±2 g ou ±6 g. Três quedas foram excluídas por saturação. As ADLs são janelas "ativas" de 60 s (amplitude > 1,01 g), 1170 janelas no total.
 - **Implicação:** os números do Bagalà não são diretamente comparáveis aos nossos por arquivo. Declarar.
 
+## F. Estatística e robustez (análises de 06/10/2026; métodos em `METODOLOGIA_ANALISES.md`)
+
+### Achado 24: o Kangas detecta significativamente mais quedas que todos os outros; o Bourke3 tem a melhor especificidade
+- **Teste global:** Cochran p < 0,001 para SE e SP.
+- **Kangas × PIPTO (original):** SE +12,0 pontos (IC por participante 8,4 a 15,7).
+- **Kangas × PIPTO (tempo real):** SE +8,6 (5,2 a 12,5).
+- **Kangas × Bourke3:** SE +35,0 (30,5 a 39,2).
+- **Bourke3 × Kangas em SP:** +1,2 ponto (0,5 a 2,0). A diferença é pequena, mas sólida.
+- **PIPTO em tempo real × detector antigo do Mova em SP:** **sem diferença** (−0,2; −1,5 a 1,1). A adaptação do PIPTO para tempo real gera tantos alarmes falsos quanto o detector antigo.
+- **Evidência:** `results/estatistica.md` (McNemar exato + Holm + bootstrap por participante).
+
+### Achado 25: os intervalos "por arquivo" subestimam a incerteza
+- PIPTO, SE de 80,9%:
+  - IC de Wilson (arquivos tratados como independentes): 79,0–82,7;
+  - IC por participante: **75,3–85,9**, quase o triplo da largura.
+- **Implicação:** no artigo, relatar o IC por participante.
+
+### Achado 26: abaixo de 50 Hz os algoritmos perdem quedas; acima de 50 Hz não ganham nada
+- **A 10 Hz, perda de SE em relação a 50 Hz:**
+  - Kangas: −20,4 pontos (92,9 → 72,6);
+  - Bourke3: −19,2;
+  - PIPTO: −35,3.
+- **A 25 Hz:** o Kangas já perde 1,8 ponto (significativo).
+- **A 100 Hz:** resultado idêntico ao de 50 Hz para Kangas e PIPTO, que trabalham a 50 Hz.
+- **O detector antigo já lia a 10 Hz:** por isso não muda, e por isso era limitado.
+- **Implicação:** o app **precisa garantir ≥ 50 Hz**. Isso confirma a importância da permissão `HIGH_SAMPLING_RATE_SENSORS` (Achado 19) e de medir a taxa real no celular.
+- **Evidência:** `results/robustez/RESUMO.md`, seção 1.
+
+### Achado 27: sensores de ±4 g bastam; ±2 g derruba PIPTO, Bourke3 e o detector antigo, mas não o Kangas
+- **±4 g:** igual a ±8 g para todos os algoritmos.
+- **±2 g, perda de SE:**
+  - PIPTO: −46,1 pontos;
+  - detector antigo: −19,8;
+  - Bourke3: −10,8;
+  - Kangas: **sem mudança** (92,8%).
+- **Por que o Kangas resiste:** seus sinais de impacto são vetoriais (a soma de três eixos saturados em 2 g ainda passa de 2 g) e têm limiares de 1,5–2,0 g.
+- **Implicação:** em celulares com sensor de ±2 g, só o Kangas se mantém. Também explica a exclusão desses registros na LTMM.
+
+### Achado 28: sem calibração da posição "em pé", Kangas e Bourke3 perdem muito; com calibração, a orientação não importa
+- **Orientação aleatória sem calibração:**
+  - Kangas: SE −19,6 e **SP −21,4** pontos (98,6% → 77,2%);
+  - Bourke3: SE −9,8 e SP −12,3.
+- **Com calibração:** resultado idêntico ao original.
+- **Detector antigo e PIPTO:** idênticos com ou sem rotação, porque só usam a magnitude. Isso também confirma que o método está certo.
+- **Implicação:** a **calibração de 5 s em pé é indispensável** para os algoritmos com postura. Ela precisa estar no app final, não só no estudo.
+- **Limitação:** a rotação é fixa. O bolso real muda de orientação ao sentar, o que deve ser pior.
+
 ## E. Recursos de dados verificados
 
 | Base | Acesso deste ambiente | Uso possível |
