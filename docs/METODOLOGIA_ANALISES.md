@@ -192,7 +192,12 @@ Script: `scripts/ltmm.ts`. Base: *Long Term Movement Monitoring Database* (Physi
   - **Por que Wilcoxon:** é pareado (as mesmas pessoas) e não supõe normalidade.
   - **Alternativa:** regressão de Poisson ou binomial negativa com efeito por pessoa. Exige pacote estatístico e suposições sobre a dispersão; fica como verificação opcional.
 
-### 3.8 Limitações
+### 3.8 Análise de sensibilidade (post hoc, declarada como tal)
+- A checagem de qualidade mostrou 5 registros com a vertical estimada a mais de 30° do eixo v (até 76°, CO040). Isso pode ser sensor mal colocado ou erro na estimativa.
+- **Depois de ver isso**, repetimos a análise só com os registros a ≤ 30°. As taxas caem um pouco, mas a ordem dos algoritmos não muda.
+- Por ter sido definida depois de ver os dados, serve só para mostrar que a conclusão é estável, não como resultado principal.
+
+### 3.9 Limitações
 - Lombar ≠ celular no bolso.
 - A taxa depende do grupo (CO = sem histórico de quedas; FL = com histórico).
 - Os participantes são de Israel (contexto da coleta original).

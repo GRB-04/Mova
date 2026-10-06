@@ -16,13 +16,13 @@ Achados já verificados: [`ACHADOS.md`](ACHADOS.md). Status dos parâmetros: [`p
 
 | # | O quê | Por que importa para o artigo | Esforço |
 |---|---|---|---|
-| C1 | **Estatística entre algoritmos:** McNemar pareado (os mesmos arquivos para todos) e IC por *bootstrap* por participante. Os arquivos de uma mesma pessoa não são independentes | Permite dizer "o Kangas é melhor que o PIPTO" com significância, e não só "o número é maior" | pequeno |
+| C1 ✅ | **Estatística entre algoritmos:** McNemar pareado (os mesmos arquivos para todos) e IC por *bootstrap* por participante. Os arquivos de uma mesma pessoa não são independentes | Permite dizer "o Kangas é melhor que o PIPTO" com significância, e não só "o número é maior" | pequeno |
 | C2 | **Script único de reprodução** (`npm run estudo`): baixa a base, roda o replay, a equivalência e as figuras | Reprodutibilidade, que é o ponto central de um estudo de replicação | pequeno |
 | C3 | **Figuras do artigo:** funil por estágio, FP por atividade, SE por tipo de queda, exemplo de sinal (queda × "celular caiu") | Resultados visuais prontos | médio |
-| C4 | **Robustez à taxa de amostragem:** rodar a 10, 25, 50 e 100 Hz | Responde "quanto o celular pode ser lento?" (o detector antigo lia a ≤ 10 Hz) | pequeno |
-| C5 | **Robustez à faixa do sensor:** saturar em ±2 g e ±4 g, além de ±8 g | Celulares antigos ou econômicos; o Bagalà excluiu quedas saturadas | pequeno |
-| C6 | **Robustez à orientação:** girar o sinal aleatoriamente para simular celular no bolso em qualquer posição, com e sem calibração | Mostra quanto a postura depende da orientação (Achado 12) sem precisar de dados de bolso | médio |
-| C7 | **LTMM: alarmes falsos por dia em vida real de idosos.** 71 gravações domiciliares; baixar 5–10 registros (acessível daqui) | É a métrica que mais importa na prática; compara com 0,6/dia (Bourke) e ~5/dia (Bagalà) | médio |
+| C4 ✅ | **Robustez à taxa de amostragem:** rodar a 10, 25, 50 e 100 Hz | Responde "quanto o celular pode ser lento?" (o detector antigo lia a ≤ 10 Hz) | pequeno |
+| C5 ✅ | **Robustez à faixa do sensor:** saturar em ±2 g e ±4 g, além de ±8 g | Celulares antigos ou econômicos; o Bagalà excluiu quedas saturadas | pequeno |
+| C6 ✅ | **Robustez à orientação:** girar o sinal aleatoriamente para simular celular no bolso em qualquer posição, com e sem calibração | Mostra quanto a postura depende da orientação (Achado 12) sem precisar de dados de bolso | médio |
+| C7 ✅ | **LTMM: alarmes falsos por dia em vida real de idosos.** 71 gravações domiciliares; baixar 5–10 registros (acessível daqui) | É a métrica que mais importa na prática; compara com 0,6/dia (Bourke) e ~5/dia (Bagalà) | médio |
 | C8 | **Pontuação no critério dos autores do PIPTO** (cada detecção extra = FP), além da nossa por arquivo | Comparação justa com os números publicados (Achado 5) | pequeno |
 | C9 | **Análise de erro:** listar as quedas perdidas e as ADLs com alarme, com o estágio em que cada uma passou ou falhou | Base da Discussão; acha padrões | pequeno |
 | C10 | **Versões "ajustadas", reportadas à parte**, por exemplo PIPTO + checagem de postura, ou limiares por curva ROC com validação deixando um participante de fora | Contribuição própria ("como reduzir FP"), separada da replicação | médio |
@@ -50,6 +50,8 @@ Achados já verificados: [`ACHADOS.md`](ACHADOS.md). Status dos parâmetros: [`p
 | Afirmar desempenho "no bolso" a partir da SisFall | A SisFall é cintura; o bolso só com UMAFall ou MobiAct (E2/E3) ou com coleta (E5) |
 
 ---
+
+> Feito em 06/10/2026: C1, C4, C5, C6 e C7 (ver `METODOLOGIA_ANALISES.md` e os Achados 24–31). Próximo passo da equipe: **teste no celular real** (E4).
 
 ## 2. Curto prazo: próximas 2 semanas (Escopo A)
 

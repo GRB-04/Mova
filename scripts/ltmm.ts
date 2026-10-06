@@ -36,6 +36,8 @@ const NW_RANGE = 0.05;
 // segundos de "caminhada" para estimar a vertical (referência em pé): média do SV ≈ 1 g e DP do SV moderado
 const WALK_MEAN = [0.9, 1.1];
 const WALK_SD = [0.08, 0.6];
+/** Análise de sensibilidade (post hoc): só registros com a vertical estimada a até 30° do eixo v. */
+const MAX_UP_ANGLE_SENS = 30;
 
 type DetSpec = { name: string; hz: number; cutoff?: number; make: () => Detector };
 const DETECTORS: DetSpec[] = [
@@ -250,6 +252,14 @@ function summarize(): void {
     ...rowFor("Todos", results),
     ...rowFor("CO", results.filter((r) => r.group === "CO")),
     ...rowFor("FL", results.filter((r) => r.group === "FL")),
+    "",
+    "### Análise de sensibilidade (definida DEPOIS de ver a checagem de qualidade)",
+    "",
+    `Alguns registros têm a vertical estimada longe do eixo v do sensor (até ${f1(Math.max(...results.map((r) => r.upAngleToVerticalDeg)))}°), o que pode indicar sensor mal posicionado ou erro na estimativa. Repetição só com registros a ≤ ${MAX_UP_ANGLE_SENS}° (${results.filter((r) => r.upAngleToVerticalDeg <= MAX_UP_ANGLE_SENS).length} de ${results.length}):`,
+    "",
+    "| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |",
+    "|---|---|---|---|---|---|---|",
+    ...rowFor("Vertical ≤ 30°", results.filter((r) => r.upAngleToVerticalDeg <= MAX_UP_ANGLE_SENS)),
     "",
     "Referências publicadas (vida real/ADL contínuas): Bourke3 original 0,6/dia (Bourke 2010, via Bagalà); Bourke3 no Bagalà ≈ 5/dia; Kangas no Bagalà < 9/dia; faixa dos 13 algoritmos no Bagalà: 3–85 por 24 h.",
     "",

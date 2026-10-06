@@ -192,12 +192,42 @@ Fontes de cada evidência:
 - **Implicação:** a **calibração de 5 s em pé é indispensável** para os algoritmos com postura. Ela precisa estar no app final, não só no estudo.
 - **Limitação:** a rotação é fixa. O bolso real muda de orientação ao sentar, o que deve ser pior.
 
+### Achado 29: em vida real (LTMM), o Bourke3 reproduz o publicado; o Kangas gera muito mais alarmes falsos que o relatado
+- **Base:** 35 idosos, 65,3 dias de uso (1567,5 h). Alarmes falsos por 24 h de uso (IC 95% bootstrap por pessoa):
+
+| Algoritmo | Nós (LTMM) | Publicado |
+|---|---|---|
+| **Bourke3** | **4,2** (2,9–5,8) | ≈ 5/dia no Bagalà ✅; 0,6/dia no original |
+| Mova antigo | 15,4 (11,6–19,6) | — |
+| PIPTO (tempo real) | 16,4 (10,6–24,2) | — |
+| **Kangas** | **21,7** (14,3–31,9) | < 9/dia no Bagalà ⚠️ |
+| Kangas (eixo z) | 10,7 (4,0–20,1) | — |
+
+- **Comparações pareadas** (Wilcoxon + Holm):
+  - o Bourke3 gera menos alarmes falsos que o Mova antigo, o Kangas e o PIPTO (contra o "Kangas (eixo z)" a diferença não resiste à correção de Holm, p = 0,096);
+  - o Kangas gera mais que o PIPTO;
+  - o PIPTO em tempo real e o Mova antigo **não diferem**.
+- **Análise de sensibilidade (post hoc):** sem os 5 registros com a vertical estimada a mais de 30° do eixo do sensor, as taxas caem um pouco (Kangas 16,8; Bourke3 3,7), mas a ordem não muda.
+- **Implicação, a principal tensão do estudo:**
+  - o **Kangas** é o melhor em detectar quedas (SisFall), mas daria **cerca de 1 alarme falso por hora acordado**;
+  - o **Bourke3** tem poucos alarmes falsos, mas perde **42% das quedas simuladas**.
+- **Nenhum algoritmo publicado, sozinho, tem as duas qualidades.** Isso motiva as "versões ajustadas" (plano C10) e é a mensagem central da Discussão.
+- **Evidência:** `results/ltmm/RESUMO.md`.
+
+### Achado 30: metade da LTMM não serve para avaliar detectores de impacto
+- **36 de 71** registros foram excluídos. Quase todos porque o sensor só mede até ±1,93 g (alguns até ±0,86 g), abaixo dos limiares de impacto. Os demais saíram por duração ou pela queda relatada (CO005).
+- **Implicação:** quem usar a LTMM para alarmes falsos sem esse filtro obteria taxas artificialmente baixas. Vale como alerta metodológico no artigo.
+
+### Achado 31: as taxas de alarme falso variam muito entre pessoas
+- Kangas: de 3,8 a 118,9 alarmes/dia. Poucas pessoas concentram muitos alarmes (por exemplo, CO038, CO039 e FL033).
+- **Implicação:** relatar mediana e IIQ, não só a média. Investigar o que essas pessoas fazem (sono? atividade?) é uma boa análise de erro para depois.
+
 ## E. Recursos de dados verificados
 
 | Base | Acesso deste ambiente | Uso possível |
 |---|---|---|
 | SisFall (espelho CSV) | ✅ (GitHub) | já usada |
-| **LTMM** (PhysioNet, idosos em casa, até ~75 h por gravação, 100 Hz, tronco) | ✅ via S3 (`s3.amazonaws.com/physionet-open/ltmm/1.0.0/`) | **alarmes falsos por dia em vida real**, sem voluntários |
+| **LTMM** (PhysioNet, idosos em casa, até ~75 h por gravação, 100 Hz, tronco) | ✅ via S3 (`s3.amazonaws.com/physionet-open/ltmm/1.0.0/`) | **usada**: alarmes falsos por dia (Achados 29–31) |
 | UMAFall (celular no bolso + cintura, figshare) | ❌ bloqueado aqui; a equipe pode baixar | celular no bolso × cintura |
 | KFall, MobiAct | exigem pedido de acesso aos autores | comparação direta com o PIPTO (KFall); celular no bolso (MobiAct) |
 | FARSEEING (quedas reais) | acesso restrito | — |
