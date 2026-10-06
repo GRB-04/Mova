@@ -3,14 +3,14 @@
 //
 // Cada sessão é uma pasta com samples.csv, events.csv, alarms.csv e session.json.
 // 1. Reprocessa samples.csv offline com os MESMOS detectores do app e compara com alarms.csv (validação).
-// 2. Tentativa de queda (rótulo "queda ..."): VP se houver alarme entre −1 s e +5 s do marcador
-//    (se não houver marcador, qualquer alarme dentro da tentativa).
-// 3. Tentativa de ADL: FP se houver qualquer alarme dentro da tentativa.
-// 4. "uso livre": alarmes falsos por hora.
+// 2. Pontua cada tentativa com as MESMAS regras da tela de resultados do app (src/study/scoring.ts):
+//    queda: VP se houver alarme da tentativa até GRACE_S depois de parar; ADL: FP se houver alarme
+//    nessa janela; "uso livre": alarmes falsos por hora.
 import { readdirSync, readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createStudyDetectors, Vec3 } from "../src/detection";
 import { ci, metrics, pct } from "./lib/metrics";
+import { alarmsInTrial, classifyActivity, trialHit } from "../src/study/scoring";
 
 const argv = process.argv;
 const arg = (k: string, d?: string) => (argv.includes(`--${k}`) ? argv[argv.indexOf(`--${k}`) + 1] : d);
@@ -69,8 +69,8 @@ for (const dir of sessionDirs) {
         session: dir,
         position: meta.phone_position,
         label: e.label,
-        isFall: e.label.startsWith("queda"),
-        isFree: e.label === "uso livre",
+        isFall: classifyActivity(e.label) === "queda",
+        isFree: classifyActivity(e.label) === "livre",
         t0: e.tNative,
         t1: NaN,
         markers: [],
@@ -124,11 +124,10 @@ const trialRows: string[] = [];
 for (const tr of trials) {
   const alarms = offlineAlarms.get(tr.session)!;
   for (const alg of algorithms) {
-    const inTrial = alarms.filter((a) => a.algorithm === alg && a.t >= tr.t0 && a.t <= tr.t1);
-    let hit: boolean;
-    if (tr.isFall && tr.markers.length) {
-      hit = tr.markers.some((m) => alarms.some((a) => a.algorithm === alg && a.t >= m - 1 && a.t <= m + 5));
-    } else hit = inTrial.length > 0;
+    const w = { kind: classifyActivity(tr.label), tStart: tr.t0, tEnd: tr.t1, markers: tr.markers };
+    const times = alarms.filter((a) => a.algorithm === alg).map((a) => a.t);
+    const inTrial = alarmsInTrial(w, times);
+    const hit = trialHit(w, times);
     trialRows.push([tr.session, tr.position, csv(tr.label), alg, tr.isFall ? "F" : tr.isFree ? "livre" : "D", (tr.t1 - tr.t0).toFixed(1), inTrial.length, hit ? 1 : 0].join(","));
     for (const key of [`${alg}|todas`, `${alg}|${tr.position}`]) {
       add(key, (s) => {

@@ -23,11 +23,17 @@ import { Directory, File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import { createStudyDetectors, Detector, Vec3 } from "../detection";
+import { GRACE_S, TrialRecord, alarmsInTrial, classifyActivity, trialHit } from "../study/scoring";
+import { addTrial } from "../study/trialStore";
+import { meta } from "../study/detectorsMeta";
+import StudyResults, { TrialCard } from "./StudyResults";
 
 // Android: setUpdateInterval é um freio com comparação estrita (>); 15 ms garante ≥ 50 Hz.
 const UPDATE_INTERVAL_MS = Platform.OS === "android" ? 15 : 20;
 const CALIBRATION_S = 5;
 const FLUSH_MS = 1000;
+
+const DETECTOR_NAMES = createStudyDetectors().map((d) => d.name);
 
 const POSITIONS = ["cinto", "bolso da calça", "bolso da camisa", "bolsa", "mão"] as const;
 const ACTIVITIES = [
@@ -78,6 +84,10 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
   const [alarmCounts, setAlarmCounts] = useState<Record<string, number>>({});
   const [rateHz, setRateHz] = useState(0);
   const [nSamples, setNSamples] = useState(0);
+  const [tab, setTab] = useState<"coleta" | "resultados">("coleta");
+  const [finalizing, setFinalizing] = useState(false);
+  const [lastResult, setLastResult] = useState<TrialRecord | null>(null);
+  const [resultsKey, setResultsKey] = useState(0);
 
   // Refs (nunca setState por amostra)
   const subRef = useRef<EventSubscription | null>(null);
@@ -90,6 +100,9 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
   const countRef = useRef(0);
   const rateWinRef = useRef<number[]>([]);
   const alarmCountRef = useRef<Record<string, number>>({});
+  // instantes (relógio do sensor) de todos os alarmes da sessão, por detector
+  const alarmTimesRef = useRef<Record<string, number[]>>({});
+  const trialRef = useRef<{ activity: string; tStart: number; markers: number[] } | null>(null);
 
   const file = (name: string) => new File(dirRef.current!, name);
 
@@ -126,7 +139,9 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
     new File(dir, "alarms.csv").write("session_id,algorithm,t_native_s,t_js_ms_est,details\n");
     detectorsRef.current = createStudyDetectors();
     alarmCountRef.current = {};
+    alarmTimesRef.current = {};
     setAlarmCounts({});
+    setLastResult(null);
     setCalibrated(null);
     anchorRef.current = null;
     countRef.current = 0;
@@ -168,6 +183,7 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
       for (const d of detectorsRef.current) {
         for (const ev of d.push({ t: timestamp, ax: x, ay: y, az: z })) {
           alarmCountRef.current[ev.algorithm] = (alarmCountRef.current[ev.algorithm] ?? 0) + 1;
+          (alarmTimesRef.current[ev.algorithm] ??= []).push(ev.t);
           const tJsEst = anchorRef.current.tJs + (ev.t - anchorRef.current.tNative) * 1000;
           alarmBufRef.current.push(
             `${sessionId},${ev.algorithm},${ev.t.toFixed(4)},${Math.round(tJsEst)},${csvEscape(JSON.stringify(ev.details ?? {}))}\n`,
@@ -228,16 +244,66 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
   const toggleTrial = () => {
     if (!trialActive) {
       logEvent("trial_start", activity);
+      trialRef.current = { activity, tStart: estimateNative(Date.now()), markers: [] };
+      setLastResult(null);
       setTrialActive(true);
       setLocked(true);
     } else {
       logEvent("trial_end", activity);
       setTrialActive(false);
+      finishTrial(estimateNative(Date.now()));
     }
   };
 
+  const markNow = () => {
+    logEvent("marker", activity);
+    trialRef.current?.markers.push(estimateNative(Date.now()));
+  };
+
+  /** Espera GRACE_S para os detectores terminarem, pontua e salva a tentativa no aparelho. */
+  const finishTrial = (tEnd: number) => {
+    const tr = trialRef.current;
+    trialRef.current = null;
+    if (!tr || !sessionId) return;
+    setFinalizing(true);
+    setTimeout(async () => {
+      const w = { kind: classifyActivity(tr.activity), tStart: tr.tStart, tEnd, markers: tr.markers };
+      const hit: Record<string, boolean> = {};
+      const nAlarms: Record<string, number> = {};
+      for (const d of DETECTOR_NAMES) {
+        const times = alarmTimesRef.current[d] ?? [];
+        hit[d] = trialHit(w, times);
+        nAlarms[d] = alarmsInTrial(w, times).length;
+      }
+      const rec: TrialRecord = {
+        id: `${sessionId}_${Math.round(tr.tStart * 1000)}`,
+        createdAt: Date.now(),
+        sessionId,
+        volunteer: volunteer.trim(),
+        position,
+        platform: Platform.OS,
+        activity: tr.activity,
+        kind: w.kind,
+        durationS: tEnd - tr.tStart,
+        hit,
+        nAlarms,
+      };
+      try {
+        await addTrial(rec);
+      } catch {
+        Alert.alert("Não foi possível salvar o resultado", "Os arquivos CSV da sessão continuam gravados.");
+      }
+      setLastResult(rec);
+      setResultsKey((k) => k + 1);
+      setFinalizing(false);
+    }, GRACE_S * 1000);
+  };
+
   const endSession = () => {
-    if (trialActive) logEvent("trial_end", activity);
+    if (trialActive) {
+      logEvent("trial_end", activity);
+      trialRef.current = null; // tentativa interrompida: não é pontuada
+    }
     setTrialActive(false);
     writeSessionJson({ ended_at_js_ms: Date.now(), n_samples: countRef.current });
     subRef.current?.remove();
@@ -263,13 +329,23 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Estudo de quedas — coleta</Text>
+          <Text style={styles.title}>Estudo de quedas</Text>
           <TouchableOpacity onPress={onExit} disabled={!!sessionId}>
             <Ionicons name="close" size={24} color={sessionId ? "#334155" : "#94A3B8"} />
           </TouchableOpacity>
         </View>
 
-        {!sessionId ? (
+        <View style={styles.tabs}>
+          {(["coleta", "resultados"] as const).map((t) => (
+            <TouchableOpacity key={t} style={[styles.tab, tab === t && styles.tabActive]} onPress={() => setTab(t)}>
+              <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>{t === "coleta" ? "Coleta" : "Resultados"}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {tab === "resultados" ? (
+          <StudyResults detectors={DETECTOR_NAMES} refreshKey={resultsKey} />
+        ) : !sessionId ? (
           <>
             <Text style={styles.label}>ID do voluntário</Text>
             <TextInput style={styles.input} value={volunteer} onChangeText={setVolunteer} placeholder="ex.: V01" placeholderTextColor="#64748B" />
@@ -308,30 +384,39 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
             </View>
 
             <TouchableOpacity
-              style={[styles.primary, trialActive && styles.stop, !calibrated && styles.disabled]}
+              style={[styles.primary, trialActive && styles.stop, (!calibrated || finalizing) && styles.disabled]}
               onPress={toggleTrial}
-              disabled={!calibrated}
+              disabled={!calibrated || finalizing}
             >
-              <Text style={styles.primaryText}>{trialActive ? "Parar tentativa" : "Iniciar tentativa"}</Text>
+              <Text style={styles.primaryText}>
+                {finalizing ? `Aguardando os detectores (${GRACE_S} s)…` : trialActive ? "Parar tentativa" : "Iniciar tentativa"}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondary} onPress={() => logEvent("marker", activity)}>
+            <TouchableOpacity style={[styles.secondary, !trialActive && styles.disabled]} onPress={markNow} disabled={!trialActive}>
               <Text style={styles.secondaryText}>Marcar instante (ex.: queda agora)</Text>
             </TouchableOpacity>
 
-            <Text style={styles.label}>Alarmes (não notificam ninguém)</Text>
-            {detectorsRef.current.map((d) => (
-              <Text key={d.name} style={styles.stat}>
-                {d.name}: {alarmCounts[d.name] ?? 0}
+            {lastResult && (
+              <>
+                <Text style={styles.label}>Resultado da última tentativa (salvo)</Text>
+                <TrialCard trial={lastResult} detectors={DETECTOR_NAMES} />
+              </>
+            )}
+
+            <Text style={styles.label}>Alarmes na sessão (não notificam ninguém)</Text>
+            {DETECTOR_NAMES.map((d) => (
+              <Text key={d} style={styles.stat}>
+                {meta(d).label}: {alarmCounts[d] ?? 0}
               </Text>
             ))}
 
-            <TouchableOpacity style={[styles.secondary, { marginTop: 20 }]} onPress={endSession}>
+            <TouchableOpacity style={[styles.secondary, { marginTop: 20 }, finalizing && styles.disabled]} onPress={endSession} disabled={finalizing}>
               <Text style={styles.secondaryText}>Encerrar sessão</Text>
             </TouchableOpacity>
           </>
         )}
 
-        {dirRef.current && !sessionId && (
+        {tab === "coleta" && dirRef.current && !sessionId && (
           <>
             <Text style={styles.label}>Exportar última sessão</Text>
             <View style={styles.chips}>
@@ -357,6 +442,11 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#070b19" },
+  tabs: { flexDirection: "row", backgroundColor: "#111827", borderRadius: 12, padding: 4, gap: 4 },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: "center" },
+  tabActive: { backgroundColor: "#4ECDC4" },
+  tabText: { color: "#CBD5E1", fontWeight: "600" },
+  tabTextActive: { color: "#070b19" },
   container: { padding: 20, paddingTop: 40, gap: 10 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   title: { color: "#F8FAFC", fontSize: 20, fontWeight: "700" },

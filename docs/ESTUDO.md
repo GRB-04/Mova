@@ -17,7 +17,7 @@
 | 5. Avaliar A1 | feito |
 | 6. A2 Bourke3 | feito |
 | 7. A3 PIPTO + equivalência com o Python | feito |
-| 8. Tela de coleta | feito: `src/screens/RecorderScreen.tsx` (link "Modo estudo" na 1ª tela do app). **Falta testar num aparelho real** |
+| 8. Tela de coleta | feito: `src/screens/RecorderScreen.tsx` (link "Modo estudo" na 1ª tela do app), com aba **Resultados** (placar salvo no aparelho e gráficos comparando os detectores). **Falta testar num aparelho real** |
 | 9. Voluntários | pendente (equipe; ver a seção de ética) |
 | 10. Análise do celular | script pronto (`scripts/analyze_phone.ts`), validado com sessão sintética |
 | 11. Tabelas e figuras | tabela da SisFall em `results/RESUMO.md`; as do celular dependem da Etapa 9 |
@@ -60,8 +60,18 @@ npm run typecheck   # app + scripts
   2. Toque em **Iniciar sessão**.
   3. Toque em **Calibrar** e fique 5 s em pé e parado.
   4. Escolha a atividade e toque em **Iniciar tentativa**. A tela trava; segure 2 s para destravar.
-  5. Toque em **Parar tentativa**.
-- Em quedas, toque em **Marcar instante** logo depois da queda, ou peça a um auxiliar que marque.
+  5. Toque em **Parar tentativa**. O app espera 5 s para os detectores terminarem, mostra o resultado (✓/✗ por detector) e **salva no aparelho**.
+- **Marcar instante** é opcional: o marcador vai para o `events.csv`, mas não entra na pontuação. Como a tela fica travada, ele sai segundos depois da queda.
+- **Aba Resultados:**
+  - Mostra o placar acumulado de todas as sessões. Ele continua lá depois de fechar e abrir o app (fica salvo no AsyncStorage).
+  - Gráficos por detector: quedas detectadas, alarmes falsos em atividades normais e alarmes falsos por hora no uso livre. Cada barra traz a margem de incerteza (IC 95%).
+  - Tabela por atividade e filtro por posição do celular.
+  - Lista das tentativas, com botão de apagar para descartar uma tentativa errada.
+  - Exportação em CSV.
+- **Regra de pontuação** (`src/study/scoring.ts`, a mesma do `analyze_phone.ts`):
+  - **queda:** acerto se o detector alarmar entre o início da tentativa e 5 s depois de parar;
+  - **atividade normal:** qualquer alarme nessa janela é alarme falso;
+  - **uso livre:** alarmes por hora.
 - **Checagens antes dos voluntários:**
   - a taxa medida aparece na tela e precisa ser ≥ 50 Hz;
   - com o celular parado na mesa, |a| deve ficar em 1,00 ± 0,05 g, o que se confere no `samples.csv`.
