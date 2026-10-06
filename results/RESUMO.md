@@ -90,13 +90,20 @@ Leituras:
 
 ## Equivalência do porte PIPTO com o Python original
 
-_Ver `pipto_equivalencia.md` (preenchido quando o original termina de rodar)._
+O porte TS (`src/detection/pipto.ts`) foi comparado com o `def_fall.py` original dos autores, que rodou sem modificações. Detalhes em `pipto_equivalencia.md`.
+
+| Condição | Arquivos iguais (±1 amostra) | Python original: SE % / SP % | Porte TS: SE % / SP % |
+|---|---|---|---|
+| 50 Hz, ±8 g (sinal do replay) | **4396 / 4396** | 80,9 / 88,6 | 80,9 / 88,6 |
+| 200 Hz nativo, sem saturação | **4396 / 4396** | 81,3 / 86,9 | 81,3 / 86,9 |
+
+O porte é equivalente ao original. Mesmo a 200 Hz, a taxa nativa da SisFall, o original **não** chega à acurácia de > 97% relatada pelos autores nessa base.
 
 ## Comparação com o publicado (o que dizer no artigo)
 
 1. **Kangas** se saiu **melhor** na SisFall (SE 93%) do que no Bagalà (< 55% em quedas reais), e dentro da faixa do laboratório original (76–97%). A SisFall tem quedas simuladas por jovens, que terminam deitados; nas quedas reais, o idoso muitas vezes não fica deitado (Bagalà: "The LPF vertical signal rarely reaches values under 0.5 g").
 2. **Bourke3** manteve a especificidade altíssima (99,8%), mas a sensibilidade **caiu muito**: 58% contra 100% no original e 83% no Bagalà. A causa é o limiar de velocidade, e nossa forma de calcular a velocidade é uma adaptação ⚠️, porque o método do original não foi confirmado. É candidato número um à conferência no PDF (Etapa 1).
-3. **PIPTO** ficou bem abaixo da acurácia reportada na SisFall (> 97%): SE 81%, SP 89% a 50 Hz. A adaptação para tempo real piora a especificidade (82%).
+3. **PIPTO** ficou bem abaixo da acurácia reportada na SisFall (> 97%): SE 81%, SP 89% a 50 Hz. Com o **código original dos autores a 200 Hz**, o resultado é SE 81%, SP 87%, ou seja, a queda de desempenho não vem do porte nem da decimação. A adaptação para tempo real piora a especificidade (82%). Uma diferença possível é o protocolo de pontuação dos autores, que deve ser conferido no artigo.
 4. **A postura sozinha não é suficiente no celular:** o modo Guardian (eixo z) derruba a SE para 30% na SisFall, porque a orientação do sensor é outra. Isso antecipa o problema do celular no bolso.
 5. **O detector antigo do Mova** tem SP de 82% e 46 alarmes por hora de ADL roteirizada. Isso justifica a troca.
 
