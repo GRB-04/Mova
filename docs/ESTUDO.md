@@ -5,6 +5,7 @@
 - Pipeline completo e decisões: [`PIPELINE_ESTUDO_QUEDAS.md`](PIPELINE_ESTUDO_QUEDAS.md) (documento da equipe).
 - Especificação implementada e status de cada parâmetro: [`ALGORITMOS.md`](ALGORITMOS.md).
 - Resultados: [`../results/RESUMO.md`](../results/RESUMO.md).
+- Achados verificados: [`ACHADOS.md`](ACHADOS.md). Planejamento: [`PLANO_ARTIGO.md`](PLANO_ARTIGO.md).
 
 ## Estado das etapas
 

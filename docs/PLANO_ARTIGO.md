@@ -1,89 +1,76 @@
-# Plano para fechar o artigo
+# Planejamento: preparar o terreno para o artigo
 
-Situação em 06/10/2026, depois de conferir os textos completos de Bagalà 2012, PIPTO 2023 e SisFall 2017.
+Decisão da equipe (06/10/2026):
+- **o artigo ainda não será escrito**; agora é preparar dados, testes e figuras;
+- seguir o **Escopo A** (bases públicas, sem voluntários);
+- partir para o **Escopo B** (teste no celular com pessoas comuns, sem idosos) se houver tempo;
+- formato e periódico ainda não definidos (trabalho de faculdade).
 
-## 1. O que já temos
+Achados já verificados: [`ACHADOS.md`](ACHADOS.md). Status dos parâmetros: [`parametros_conferidos.md`](parametros_conferidos.md).
 
-| Bloco | Situação |
-|---|---|
-| 3 algoritmos + detector antigo implementados, com testes | ✅ |
-| Porte do PIPTO idêntico ao código dos autores (4396/4396) | ✅ |
-| Avaliação na SisFall com simulação de celular (50/100 Hz, ±8 g) | ✅ `results/RESUMO.md` |
-| Funil por estágio e taxa de erro por atividade | ✅ |
-| Parâmetros conferidos em 3 dos 5 artigos | ✅ `docs/parametros_conferidos.md` |
-| App de coleta com resultados e gráficos | ✅ compila; **não testado em aparelho** |
+---
 
-## 2. O que a leitura dos artigos mudou
+## 1. O que dá e o que não dá para fazer
 
-1. **O PIPTO nunca foi avaliado na SisFall.** O "> 97% na SisFall" do pipeline estava errado. A comparação correta é com a **KFall**, que segue o mesmo protocolo de atividades. Lá os autores relatam SE 91,6% e SP 85,9%; nós obtivemos SE 81% e SP 89%, e **as mesmas atividades enganam o algoritmo**. O ganho é que agora a comparação é honesta e já é um resultado para o artigo.
-2. **O código de referência do PIPTO não faz o que o artigo descreve** (`dist_1`/`dist_2`). É um achado de replicação e merece uma frase no artigo.
-3. **Kangas e Bourke3:** os valores usados conferem com o Bagalà. **Continua em aberto a janela de integração da velocidade do Bourke3**, que só o PDF do Bourke 2010 resolve. Esse é o ponto que mais pesa no nosso resultado.
-4. **SisFall:**
-   - o artigo tem 4510 tentativas e o espelho tem 4396;
-   - os idosos não fizeram as ADLs mais difíceis (D06, D13, D18, D19);
-   - as quedas foram sobre colchão.
+### ✅ Dá para fazer (código e análise, sem depender de ninguém)
 
-   Tudo isso entra em Limitações.
+| # | O quê | Por que importa para o artigo | Esforço |
+|---|---|---|---|
+| C1 | **Estatística entre algoritmos:** McNemar pareado (os mesmos arquivos para todos) e IC por *bootstrap* por participante. Os arquivos de uma mesma pessoa não são independentes | Permite dizer "o Kangas é melhor que o PIPTO" com significância, e não só "o número é maior" | pequeno |
+| C2 | **Script único de reprodução** (`npm run estudo`): baixa a base, roda o replay, a equivalência e as figuras | Reprodutibilidade, que é o ponto central de um estudo de replicação | pequeno |
+| C3 | **Figuras do artigo:** funil por estágio, FP por atividade, SE por tipo de queda, exemplo de sinal (queda × "celular caiu") | Resultados visuais prontos | médio |
+| C4 | **Robustez à taxa de amostragem:** rodar a 10, 25, 50 e 100 Hz | Responde "quanto o celular pode ser lento?" (o detector antigo lia a ≤ 10 Hz) | pequeno |
+| C5 | **Robustez à faixa do sensor:** saturar em ±2 g e ±4 g, além de ±8 g | Celulares antigos ou econômicos; o Bagalà excluiu quedas saturadas | pequeno |
+| C6 | **Robustez à orientação:** girar o sinal aleatoriamente para simular celular no bolso em qualquer posição, com e sem calibração | Mostra quanto a postura depende da orientação (Achado 12) sem precisar de dados de bolso | médio |
+| C7 | **LTMM: alarmes falsos por dia em vida real de idosos.** 71 gravações domiciliares; baixar 5–10 registros (acessível daqui) | É a métrica que mais importa na prática; compara com 0,6/dia (Bourke) e ~5/dia (Bagalà) | médio |
+| C8 | **Pontuação no critério dos autores do PIPTO** (cada detecção extra = FP), além da nossa por arquivo | Comparação justa com os números publicados (Achado 5) | pequeno |
+| C9 | **Análise de erro:** listar as quedas perdidas e as ADLs com alarme, com o estágio em que cada uma passou ou falhou | Base da Discussão; acha padrões | pequeno |
+| C10 | **Versões "ajustadas", reportadas à parte**, por exemplo PIPTO + checagem de postura, ou limiares por curva ROC com validação deixando um participante de fora | Contribuição própria ("como reduzir FP"), separada da replicação | médio |
+| C11 | **Repetir a avaliação quando chegarem os PDFs** (Kangas 2008, Bourke 2010, Tabela S1) | Fecha os parâmetros ⚠️ | pequeno (depois dos PDFs) |
 
-## 3. Decisão principal: o escopo do artigo
+### ⚠️ Dá, mas depende da equipe
 
-A pergunta do pipeline é "funciona **no celular**?". Há dois caminhos.
-
-| | **Escopo A: replicação offline** | **Escopo B: replicação + celular** |
+| # | O quê | Depende de |
 |---|---|---|
-| Pergunta | Os algoritmos publicados mantêm o desempenho numa base pública independente, com o sinal degradado para a qualidade de um celular? | A mesma, mais o teste com o app num celular real |
-| Dados | SisFall (pronto) + **UMAFall** (opcional: tem celular no bolso e sensor na cintura gravados juntos; acesso público no figshare) | SisFall + coleta com voluntários (Etapa 9) |
-| Ética (CEP) | **Não precisa**: só dados públicos | Provavelmente precisa. **A aprovação no CEP costuma levar semanas ou meses** |
-| Prazo | 1–2 semanas | Depende do CEP |
-| Força | Média-alta: replicação + equivalência de código + análise por estágio | Alta: responde exatamente à pergunta do pipeline |
+| E1 | Conferir Kangas 2008, Bourke 2010 e Tabela S1 | PDFs via CAPES/biblioteca |
+| E2 | Avaliar na **UMAFall** (celular no bolso + cintura) | Baixar o zip do figshare (bloqueado aqui) |
+| E3 | Avaliar na **KFall** (comparação direta com o PIPTO) ou na **MobiAct** (bolso) | Pedir acesso aos autores |
+| E4 | Testar o app num celular real: taxa medida, celular parado, **celular caindo no chão e jogado no sofá** (não envolve pessoas) | Um aparelho Android + development build |
+| E5 | Escopo B: tentativas com voluntários (pessoas comuns) | Conversar com o orientador sobre o CEP **antes** de coletar |
 
-**Recomendação:** fechar o **Escopo A** agora, com UMAFall se der tempo, porque a UMAFall responde "celular no bolso" sem envolver pessoas. A coleta com voluntários fica como trabalho futuro, ou como 2ª versão se o CEP sair a tempo. O app de coleta já existe e entra no artigo como contribuição de método e ferramenta.
+### ❌ Não dá (ou não deve ser feito)
 
-Testes que **não envolvem pessoas** e podem entrar mesmo no Escopo A:
-- taxa de amostragem real do celular;
-- celular parado na mesa;
-- celular deixado cair no chão e jogado no sofá.
-
-Os dois últimos são o falso positivo mais provável no mundo real. Confirmar com o orientador.
-
-## 4. Tarefas, por seção do artigo
-
-### Métodos
-| Tarefa | Quem | Situação |
-|---|---|---|
-| Baixar **Kangas 2008** e **Bourke 2010** (CAPES) e conferir limiares e janela de velocidade | equipe | falta |
-| Baixar a **Tabela S1 do Bagalà** (DOCX) e confirmar qual sinal é o Kangas 2a | equipe | falta |
-| Atualizar o código se algum parâmetro divergir e rodar tudo de novo | agente | depende do item acima |
-| Redigir a descrição dos algoritmos com as adaptações marcadas ⚠️ | agente (rascunho) + equipe | `docs/ALGORITMOS.md` já tem o conteúdo |
-| Descrever a simulação do celular e a pontuação por arquivo | agente | conteúdo pronto |
-
-### Resultados
-| Tarefa | Quem | Situação |
-|---|---|---|
-| Tabela principal (publicado × Bagalà × SisFall) | agente | pronta no RESUMO; falta formatar |
-| **Teste estatístico entre algoritmos** (McNemar pareado: os mesmos arquivos para todos) | agente | falta; pequeno |
-| Figuras: funil por estágio, FP por atividade, exemplo de sinal (queda × "celular caiu") | agente | falta |
-| (Opcional) Avaliação na UMAFall: celular no bolso × cintura | agente + equipe (download) | falta |
-| (Escopo B) Resultados do celular | equipe + agente | depende do CEP |
-
-### Discussão e limitações
-| Ponto | Base |
+| O quê | Por quê |
 |---|---|
-| A postura é o estágio que elimina os FPs (Kangas 792 → 38) | nosso funil |
-| A velocidade do Bourke3 derruba a SE em quedas simuladas | nosso funil + Bagalà (mesmo fenômeno no Kangas3) |
-| O PIPTO falha nas mesmas atividades na KFall e na SisFall | PIPTO Tabela 6 × nosso RESUMO |
-| O detector antigo do Mova: SP 82% e ≈ 46 alarmes/h em ADL roteirizada | nosso replay |
-| Limitações: quedas simuladas por jovens sobre colchão; SisFall incompleta (4396/4510); idosos sem ADLs difíceis; sensor na cintura ≠ bolso; parâmetros ⚠️; app só em primeiro plano | artigos + implementação |
+| Testar com quedas reais de idosos | Não é ético provocar quedas; as bases com quedas reais (FARSEEING) são de acesso restrito |
+| Rodar o app num celular a partir deste ambiente | Não há aparelho aqui; a taxa real e o comportamento do sensor só se medem no celular |
+| Baixar de PLoS, figshare ou CAPES daqui | Bloqueado pela rede deste ambiente (ou pago) |
+| Monitorar em segundo plano com o Expo atual | O `expo-sensors` para em segundo plano; exigiria um módulo nativo (trabalho futuro) |
+| Ajustar limiares e chamar o resultado de "algoritmo original" | Invalida a replicação; versões ajustadas vão sempre em seção separada (C10) |
+| Afirmar desempenho "no bolso" a partir da SisFall | A SisFall é cintura; o bolso só com UMAFall ou MobiAct (E2/E3) ou com coleta (E5) |
 
-### Introdução e trabalhos relacionados
-| Tarefa | Situação |
-|---|---|
-| Contexto (quedas em idosos, "long-lie", falsos alarmes) | o Bagalà e a SisFall têm boas referências |
-| Trabalhos relacionados: Luque 2014, Aziz 2017 e outros do Apêndice A do pipeline | **conferir antes de citar** |
+---
 
-## 5. O que preciso da equipe para começar
+## 2. Curto prazo: próximas 2 semanas (Escopo A)
 
-1. **Escopo:** A ou B?
-2. **Destino do artigo**, modelo e limite de páginas, **prazo**.
-3. **PDFs:** Kangas 2008, Bourke 2010 e Tabela S1 do Bagalà.
-4. (Se for incluir a UMAFall) **baixar o zip** do figshare (`UMA_ADL_FALL_Dataset.zip`), que está bloqueado no meu ambiente.
+| Ordem | Tarefa | Quem |
+|---|---|---|
+| 1 | C1 estatística + C8 pontuação dos autores + C9 análise de erro | agente |
+| 2 | C4 taxa + C5 faixa (robustez do "celular") | agente |
+| 3 | C3 figuras | agente |
+| 4 | C2 script único de reprodução | agente |
+| 5 | E1 PDFs → C11 rodar de novo com os parâmetros conferidos | equipe → agente |
+| 6 | C7 LTMM (alarmes falsos por dia) | agente |
+| 7 | E4 teste do app num celular, sem pessoas | equipe |
+
+**Entregável do curto prazo:** a pasta `results/` com tabelas e figuras finais da SisFall e da LTMM, robustez a taxa e faixa, estatística, e o app validado num aparelho.
+
+## 3. Longo prazo: depois do curto prazo, se houver tempo
+
+| Fase | Tarefa | Depende de |
+|---|---|---|
+| L1 | C6 robustez à orientação + E2 UMAFall (bolso × cintura) | download da UMAFall |
+| L2 | C10 versões ajustadas para reduzir FP (contribuição própria) | L1 |
+| L3 | Escopo B: CEP → protocolo → coleta com 3–5 voluntários (cinto e bolso, quedas no colchão, ADLs, celular caindo, 2–4 h de uso livre) → `analyze_phone.ts` | orientador/CEP |
+| L4 | Trabalho futuro do produto: usar o melhor detector no `SeniorScreen`; módulo nativo para monitorar em segundo plano | fora do escopo do artigo |
+| L5 | Escrever o artigo | definição de formato e prazo |
