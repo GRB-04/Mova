@@ -9,6 +9,7 @@ Fontes de cada evidência:
 - **[código PIPTO]** `github.com/smoutsis/fall_detection_through_acceleration_data`, commit `c0f7aa2`, `python/def_fall.py`.
 - **[Guardian]** porte do Kangas, `altermarkive/guardian/Detector.kt` (MIT).
 - **[expo-sensors]** código-fonte do `expo-sensors` 57.0.x instalado no projeto.
+- **[Bourke 2010]** Bourke et al. 2010, *J Biomech* 43(15):3051–3057, doi:10.1016/j.jbiomech.2010.07.005 (PDF).
 - **[replay]** nossos resultados: `results/RESUMO.md`, `results/sisfall_*.md`, `results/pipto_equivalencia.md`.
 
 ---
@@ -77,7 +78,7 @@ Fontes de cada evidência:
 ### Achado 9: a janela de integração da velocidade do Bourke3 não está descrita no Bagalà, e é o que mais derruba o Bourke3
 - **O que é:** o Bagalà só diz "numerical integration of the SV signal with the gravity component subtracted", sem dizer a janela. No nosso funil, o estágio de velocidade elimina **466 quedas** (1548 → 1082). Com janela fixa de 1 s a SE sobe de 57,9% para 64,5%.
 - **Evidência:** [Bagalà] seção "The algorithms"; [replay] `sisfall_bourke3*.md`.
-- **Implicação:** é o **parâmetro mais importante a conferir** no PDF do Bourke 2010. Enquanto isso, é uma adaptação ⚠️.
+- **Implicação:** é o **parâmetro mais importante a conferir**. **Atualização:** o PDF do Bourke 2010 também não descreve a janela e remete a Bourke 2008a (ver Achado 33).
 
 ### Achado 10: Kangas foi melhor na SisFall do que nas quedas reais do Bagalà
 - **O que é:** SE 92,9% / SP 98,6% na SisFall, contra SE < 55% no Bagalà. Na SisFall, as quedas simuladas terminam deitadas. Nas reais, o idoso muitas vezes não deita ("subjects who fell on their buttocks, knees, or against a table … did not lie on the floor").
@@ -221,6 +222,38 @@ Fontes de cada evidência:
 ### Achado 31: as taxas de alarme falso variam muito entre pessoas
 - Kangas: de 3,8 a 118,9 alarmes/dia. Poucas pessoas concentram muitos alarmes (por exemplo, CO038, CO039 e FL033).
 - **Implicação:** relatar mediana e IIQ, não só a média. Investigar o que essas pessoas fazem (sono? atividade?) é uma boa análise de erro para depois.
+
+## G. O que o PDF do Bourke 2010 mudou
+
+### Achado 32: os "100% de sensibilidade e especificidade" do Bourke3 são dentro da amostra
+- **O que é:** os limiares foram escolhidos a partir dos **picos mínimos das próprias quedas** usadas para avaliar ("thresholds that ensure 100% sensitivity were obtained from Figs. 4 and 5"). A SE de 100% é garantida por construção e **não foi testada em dados novos**.
+- **Evidência:** [Bourke 2010] seção 3 e Figs. 4–5.
+- **Implicação:** é o mecanismo clássico de **sobreajuste** e explica parte da queda de desempenho na replicação (Bagalà: 82,8%; nós: 57,9%). Ponto central da Discussão.
+
+### Achado 33: a janela de integração da velocidade não está no Bourke 2010
+- O texto só diz "numerical integration of the RSS signal with the magnitude of static acceleration (gravity) subtracted" e remete a **Bourke et al. 2008a** (anais do IEEE EMBC 2008).
+- **Implicação:** o Achado 9 continua em aberto. O próximo artigo a buscar é o Bourke 2008a. Enquanto isso, a nossa janela segue declarada como adaptação, com as variantes de sensibilidade (`fixed-1s`: SE 64,5%).
+
+### Achado 34: a calibração de 5 s em pé é o método ORIGINAL do Bourke
+- "g_REF is the average of the tri-axial accelerometer signal recorded when the sensor is attached and the subject is in a standing position for 5 s."
+- **Implicação:** a calibração do app **reproduz** o original, em vez de adaptá-lo. Os autores também justificam: o produto escalar "allows the sensor to be attached in any orientation". Isso confirma o Achado 28.
+
+### Achado 35: o "0,6 alarme falso por dia" do Bourke usa dia de 16,5 h acordado
+- 2 falsos positivos em 52,4 h **diurnas** (10 idosos, até 8 h cada) = 0,04 FP/h. O "dia" foi definido como 16,5 h.
+- **Na mesma escala, a LTMM dá ao Bourke3 2,9 FP por "dia acordado"** (0,17/h), cerca de **4 vezes** o original. A conversão supõe a mesma taxa dia e noite; as 24 h de uso da LTMM incluem parte do sono.
+- **Implicação:** comparar sempre na mesma unidade. A nossa tabela da LTMM traz as duas.
+
+### Achado 36: o "Bourke3" original admite 4 formas de detectar o impacto, cada uma sozinha
+- VELOCITY+IMPACT+POSTURE foi testado com o impacto por UFT, por UFTD (RSSD ≥ 2,2 g), por "Profile FE" (LFT + tFE + UFT) ou por "Profile RE" (LFT + tRE + UFT). As quatro deram o mesmo resultado.
+- A nossa versão (e a descrição do Bagalà) exige tFE **e** tRE ao mesmo tempo, o que é mais restritivo.
+- **Implicação:** a variante `bourke3-noedge` (impacto só por UFT) é uma das versões **originais** (SE 60,1%). Pouco muda, porque o gargalo é a velocidade.
+
+### Achado 37: a taxa de 200 Hz do original não muda o resultado
+- O Bourke amostrava a 200 Hz e nós usamos 100 Hz. Rodando a 200 Hz na SisFall: SE 57,2% × 57,9%, SP igual.
+- **Implicação:** a escolha de 100 Hz não explica a baixa sensibilidade.
+
+### Achado 38: o filtro do Kangas (0,25 Hz) foi confirmado por fonte independente
+- O Bourke 2010 calcula o RSSD "using the formula by Kangas et al. (2008) … second-order Butterworth filter (fc = 0.25 Hz)". Isso bate com o porte Guardian.
 
 ## E. Recursos de dados verificados
 

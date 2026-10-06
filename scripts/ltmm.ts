@@ -38,6 +38,8 @@ const WALK_MEAN = [0.9, 1.1];
 const WALK_SD = [0.08, 0.6];
 /** Análise de sensibilidade (post hoc): só registros com a vertical estimada a até 30° do eixo v. */
 const MAX_UP_ANGLE_SENS = 30;
+/** Bourke 2010 define "dia" como 16,5 h acordado (7,5 h de sono). Usado só para comparar com o publicado. */
+const WAKING_H = 16.5;
 
 type DetSpec = { name: string; hz: number; cutoff?: number; make: () => Detector };
 const DETECTORS: DetSpec[] = [
@@ -223,7 +225,7 @@ function summarize(): void {
       const rates = rs.map((r) => perDay(r, d));
       const pooled = (rs2: RecordResult[]) => rs2.reduce((a, r) => a + r.alarms[d].length, 0) / (rs2.reduce((a, r) => a + r.wearHours, 0) / 24);
       const boot = clusterBootstrap(rs.map((r) => [r]), pooled, 2000, 11);
-      return `| ${label} | ${LABEL[d]} | ${rs.reduce((a, r) => a + r.alarms[d].length, 0)} | ${f1(boot.estimate)} (${f1(boot.ci[0])}–${f1(boot.ci[1])}) | ${f1(q(rates, 0.5))} (${f1(q(rates, 0.25))}–${f1(q(rates, 0.75))}) | ${f1(Math.min(...rates))}–${f1(Math.max(...rates))} | ${rates.filter((x) => x === 0).length} |`;
+      return `| ${label} | ${LABEL[d]} | ${rs.reduce((a, r) => a + r.alarms[d].length, 0)} | ${f1(boot.estimate)} (${f1(boot.ci[0])}–${f1(boot.ci[1])}) | ${f1((boot.estimate * WAKING_H) / 24)} | ${f1(q(rates, 0.5))} (${f1(q(rates, 0.25))}–${f1(q(rates, 0.75))}) | ${f1(Math.min(...rates))}–${f1(Math.max(...rates))} | ${rates.filter((x) => x === 0).length} |`;
     });
   // comparação pareada entre detectores (mesmas pessoas): Wilcoxon + Holm
   const pairs: { a: string; b: string; med: number; p: number; pH?: number }[] = [];
@@ -247,8 +249,8 @@ function summarize(): void {
     "",
     "## Alarmes falsos por dia",
     "",
-    "| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |",
-    "|---|---|---|---|---|---|---|",
+    "| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Por \"dia acordado\" de 16,5 h (critério do Bourke 2010) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |",
+    "|---|---|---|---|---|---|---|---|",
     ...rowFor("Todos", results),
     ...rowFor("CO", results.filter((r) => r.group === "CO")),
     ...rowFor("FL", results.filter((r) => r.group === "FL")),
@@ -257,11 +259,11 @@ function summarize(): void {
     "",
     `Alguns registros têm a vertical estimada longe do eixo v do sensor (até ${f1(Math.max(...results.map((r) => r.upAngleToVerticalDeg)))}°), o que pode indicar sensor mal posicionado ou erro na estimativa. Repetição só com registros a ≤ ${MAX_UP_ANGLE_SENS}° (${results.filter((r) => r.upAngleToVerticalDeg <= MAX_UP_ANGLE_SENS).length} de ${results.length}):`,
     "",
-    "| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |",
-    "|---|---|---|---|---|---|---|",
+    "| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Por \"dia acordado\" de 16,5 h (critério do Bourke 2010) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |",
+    "|---|---|---|---|---|---|---|---|",
     ...rowFor("Vertical ≤ 30°", results.filter((r) => r.upAngleToVerticalDeg <= MAX_UP_ANGLE_SENS)),
     "",
-    "Referências publicadas (vida real/ADL contínuas): Bourke3 original 0,6/dia (Bourke 2010, via Bagalà); Bourke3 no Bagalà ≈ 5/dia; Kangas no Bagalà < 9/dia; faixa dos 13 algoritmos no Bagalà: 3–85 por 24 h.",
+    "Referências publicadas (vida real/ADL contínuas): Bourke3 original 0,6 por dia acordado de 16,5 h = 0,04/h (Bourke 2010: 2 FP em 52,4 h diurnas de 10 idosos); Bourke3 no Bagalà ≈ 5/dia; Kangas no Bagalà < 9/dia; faixa dos 13 algoritmos no Bagalà: 3–85 por 24 h.",
     "",
     "## Comparação entre algoritmos (mesmas pessoas: Wilcoxon pareado, correção de Holm)",
     "",

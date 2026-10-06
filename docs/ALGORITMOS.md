@@ -21,7 +21,7 @@ Fontes lidas durante a implementação (e, depois, os XML completos de Bagalà, 
 | Tempo | segundos, a partir do `timestamp` nativo do sensor (não a hora de chegada no JS) | ✅ (doc. Expo) |
 | Reamostragem | cada detector reamostra a entrada por interpolação linear para a própria taxa (`resample.ts`), como o Guardian | ⚠️ |
 | Taxas | Kangas 50 Hz; Bourke3 100 Hz; PIPTO 50 Hz; legado 10 Hz | ver abaixo |
-| Referência "em pé" | celular: média do acelerômetro em 5 s de calibração em pé. SisFall: vetor fixo `[0, −1, 0]` (orientação de montagem do sensor na cintura: em pé, eixo y ≈ −1 g, conferido nos dados) | ⚠️ |
+| Referência "em pé" | celular: média do acelerômetro em 5 s de calibração em pé (**é o método original do Bourke 2010**, Fig. 3). SisFall: vetor fixo `[0, −1, 0]` (orientação de montagem do sensor na cintura: em pé, eixo y ≈ −1 g, conferido nos dados) | ⚠️ |
 
 ## A0: detector anterior do Mova (linha de base) — `legacy.ts`
 
@@ -57,7 +57,7 @@ Reproduz o `SeniorScreen.tsx` original: `Accelerometer.setUpdateInterval(100)` e
 | Velocidade vertical | ≤ −0,7 m/s | ✅ Bagalà |
 | Cálculo da velocidade | mínimo de ∫(SV − 1 g)·9,80665·dt, do último cruzamento de 1 g para baixo antes do início da queda (no máximo 1 s antes do impacto) até o impacto. Variante `fixed-1s` para análise de sensibilidade | ⚠️ (Bagalà: "numerical integration of the SV signal with the gravity component subtracted"; a janela não é descrita) |
 | Postura | ângulo entre o vetor gravidade atual (média móvel de 0,5 s ⚠️) e a referência em pé > 60° em mais de 75% das amostras de t+1 s a t+3 s | ✅ Bagalà |
-| Taxa | 100 Hz | ⚠️ (Bagalà: "50 a 250 Hz") |
+| Taxa | 100 Hz | ⚠️ (o original usava 200 Hz; testado a 200 Hz: SE 57,2% × 57,9%, Achado 37) |
 | Refratário | novos cruzamentos de UFT são ignorados até t+3 s (candidato aceito) ou t+0,5 s (rejeitado) | ⚠️ |
 
 O Bagalà relata para o original **0,6 falso positivo/dia** e SE = SP = 100% em quedas simuladas. A outra fonte citada no pipeline (SE 94,6%, 0,94 FP/dia) precisa ser conferida no PDF.

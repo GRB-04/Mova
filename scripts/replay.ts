@@ -75,6 +75,8 @@ const variants: Record<string, Variant[]> = {
     { name: "bourke3", fs: 100, run: streaming(() => new Bourke3Detector()) },
     { name: "bourke3-noedge", fs: 100, run: streaming(() => new Bourke3Detector({ useEdgeTimes: false, name: "bourke3-noedge" })) },
     { name: "bourke3-fixed1s", fs: 100, run: streaming(() => new Bourke3Detector({ velocityWindow: "fixed-1s", name: "bourke3-fixed1s" })) },
+    // taxa do original (Bourke 2010: 200 Hz, filtro analógico de 100 Hz) — sensibilidade à nossa escolha de 100 Hz
+    { name: "bourke3-200hz", fs: 200, cutoffHz: 80, run: streaming(() => new Bourke3Detector({ fs: 200, name: "bourke3-200hz" })) },
   ],
   pipto: [
     {

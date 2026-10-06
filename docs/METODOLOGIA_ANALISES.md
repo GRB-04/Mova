@@ -192,6 +192,10 @@ Script: `scripts/ltmm.ts`. Base: *Long Term Movement Monitoring Database* (Physi
   - **Por que Wilcoxon:** é pareado (as mesmas pessoas) e não supõe normalidade.
   - **Alternativa:** regressão de Poisson ou binomial negativa com efeito por pessoa. Exige pacote estatístico e suposições sobre a dispersão; fica como verificação opcional.
 
+### 3.7b Unidade "por dia": 24 h × "dia acordado"
+- A métrica principal é **por 24 h de uso**, porque não sabemos quando cada pessoa dormia.
+- O Bourke 2010 relata "por dia" = **16,5 h acordado**. Para comparar, a tabela traz também a taxa convertida (× 16,5/24). A conversão supõe a mesma taxa dia e noite; se houver menos alarmes durante o sono, a taxa real acordado é um pouco maior.
+
 ### 3.8 Análise de sensibilidade (post hoc, declarada como tal)
 - A checagem de qualidade mostrou 5 registros com a vertical estimada a mais de 30° do eixo v (até 76°, CO040). Isso pode ser sensor mal colocado ou erro na estimativa.
 - **Depois de ver isso**, repetimos a análise só com os registros a ≤ 30°. As taxas caem um pouco, mas a ordem dos algoritmos não muda.

@@ -6,37 +6,37 @@ A LTMM não tem quedas anotadas: **todo alarme é contado como falso**. "Por dia
 
 ## Alarmes falsos por dia
 
-| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |
-|---|---|---|---|---|---|---|
-| Todos | Mova antigo | 1008 | 15,4 (11,6–19,6) | 11,2 (7,7–21,0) | 2,5–53,3 | 0 |
-| Todos | Kangas | 1419 | 21,7 (14,3–31,9) | 13,2 (7,2–28,1) | 3,8–118,9 | 0 |
-| Todos | Kangas (eixo z) | 699 | 10,7 (4,0–20,1) | 3,2 (1,9–5,8) | 0,7–106,2 | 0 |
-| Todos | Bourke3 | 272 | 4,2 (2,9–5,8) | 2,7 (1,7–4,9) | 0,5–26,6 | 0 |
-| Todos | PIPTO (tempo real) | 1070 | 16,4 (10,6–24,2) | 10,2 (6,8–17,2) | 2,1–117,7 | 0 |
-| CO | Mova antigo | 635 | 15,9 (11,5–21,6) | 11,2 (7,7–19,8) | 3,6–53,3 | 0 |
-| CO | Kangas | 760 | 19,1 (11,4–29,1) | 11,2 (7,0–24,9) | 3,8–118,9 | 0 |
-| CO | Kangas (eixo z) | 407 | 10,2 (3,4–20,1) | 3,3 (2,4–5,1) | 1,2–106,2 | 0 |
-| CO | Bourke3 | 183 | 4,6 (2,8–7,3) | 2,8 (2,0–4,8) | 0,5–26,6 | 0 |
-| CO | PIPTO (tempo real) | 653 | 16,4 (9,9–27,1) | 9,8 (7,9–17,0) | 5,2–117,7 | 0 |
-| FL | Mova antigo | 373 | 14,6 (8,7–21,6) | 10,5 (6,7–20,9) | 2,5–37,0 | 0 |
-| FL | Kangas | 659 | 25,9 (12,8–44,4) | 16,5 (10,1–28,8) | 4,3–114,2 | 0 |
-| FL | Kangas (eixo z) | 292 | 11,5 (2,4–28,7) | 2,6 (1,2–9,3) | 0,7–99,4 | 0 |
-| FL | Bourke3 | 89 | 3,5 (2,1–5,4) | 2,4 (1,5–4,9) | 0,5–11,5 | 0 |
-| FL | PIPTO (tempo real) | 417 | 16,4 (7,7–26,8) | 10,8 (4,9–19,6) | 2,1–50,3 | 0 |
+| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Por "dia acordado" de 16,5 h (critério do Bourke 2010) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |
+|---|---|---|---|---|---|---|---|
+| Todos | Mova antigo | 1008 | 15,4 (11,6–19,6) | 10,6 | 11,2 (7,7–21,0) | 2,5–53,3 | 0 |
+| Todos | Kangas | 1419 | 21,7 (14,3–31,9) | 14,9 | 13,2 (7,2–28,1) | 3,8–118,9 | 0 |
+| Todos | Kangas (eixo z) | 699 | 10,7 (4,0–20,1) | 7,4 | 3,2 (1,9–5,8) | 0,7–106,2 | 0 |
+| Todos | Bourke3 | 272 | 4,2 (2,9–5,8) | 2,9 | 2,7 (1,7–4,9) | 0,5–26,6 | 0 |
+| Todos | PIPTO (tempo real) | 1070 | 16,4 (10,6–24,2) | 11,3 | 10,2 (6,8–17,2) | 2,1–117,7 | 0 |
+| CO | Mova antigo | 635 | 15,9 (11,5–21,6) | 11,0 | 11,2 (7,7–19,8) | 3,6–53,3 | 0 |
+| CO | Kangas | 760 | 19,1 (11,4–29,1) | 13,1 | 11,2 (7,0–24,9) | 3,8–118,9 | 0 |
+| CO | Kangas (eixo z) | 407 | 10,2 (3,4–20,1) | 7,0 | 3,3 (2,4–5,1) | 1,2–106,2 | 0 |
+| CO | Bourke3 | 183 | 4,6 (2,8–7,3) | 3,2 | 2,8 (2,0–4,8) | 0,5–26,6 | 0 |
+| CO | PIPTO (tempo real) | 653 | 16,4 (9,9–27,1) | 11,3 | 9,8 (7,9–17,0) | 5,2–117,7 | 0 |
+| FL | Mova antigo | 373 | 14,6 (8,7–21,6) | 10,1 | 10,5 (6,7–20,9) | 2,5–37,0 | 0 |
+| FL | Kangas | 659 | 25,9 (12,8–44,4) | 17,8 | 16,5 (10,1–28,8) | 4,3–114,2 | 0 |
+| FL | Kangas (eixo z) | 292 | 11,5 (2,4–28,7) | 7,9 | 2,6 (1,2–9,3) | 0,7–99,4 | 0 |
+| FL | Bourke3 | 89 | 3,5 (2,1–5,4) | 2,4 | 2,4 (1,5–4,9) | 0,5–11,5 | 0 |
+| FL | PIPTO (tempo real) | 417 | 16,4 (7,7–26,8) | 11,3 | 10,8 (4,9–19,6) | 2,1–50,3 | 0 |
 
 ### Análise de sensibilidade (definida DEPOIS de ver a checagem de qualidade)
 
 Alguns registros têm a vertical estimada longe do eixo v do sensor (até 76,4°), o que pode indicar sensor mal posicionado ou erro na estimativa. Repetição só com registros a ≤ 30° (30 de 35):
 
-| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |
-|---|---|---|---|---|---|---|
-| Vertical ≤ 30° | Mova antigo | 724 | 13,1 (10,1–16,9) | 11,0 (7,5–17,1) | 2,5–53,3 | 0 |
-| Vertical ≤ 30° | Kangas | 927 | 16,8 (11,1–24,7) | 11,3 (7,1–17,8) | 3,8–118,9 | 0 |
-| Vertical ≤ 30° | Kangas (eixo z) | 463 | 8,4 (3,4–15,8) | 3,2 (1,9–5,1) | 0,7–106,2 | 0 |
-| Vertical ≤ 30° | Bourke3 | 202 | 3,7 (2,4–5,6) | 2,4 (1,6–4,7) | 0,5–26,6 | 0 |
-| Vertical ≤ 30° | PIPTO (tempo real) | 781 | 14,1 (9,0–22,5) | 9,6 (6,5–15,7) | 2,1–117,7 | 0 |
+| Grupo | Algoritmo | Alarmes (total) | Taxa agregada/dia (IC 95% bootstrap por pessoa) | Por "dia acordado" de 16,5 h (critério do Bourke 2010) | Mediana por pessoa (IIQ) | Mín.–máx. por pessoa | Pessoas com 0 alarmes |
+|---|---|---|---|---|---|---|---|
+| Vertical ≤ 30° | Mova antigo | 724 | 13,1 (10,1–16,9) | 9,0 | 11,0 (7,5–17,1) | 2,5–53,3 | 0 |
+| Vertical ≤ 30° | Kangas | 927 | 16,8 (11,1–24,7) | 11,5 | 11,3 (7,1–17,8) | 3,8–118,9 | 0 |
+| Vertical ≤ 30° | Kangas (eixo z) | 463 | 8,4 (3,4–15,8) | 5,8 | 3,2 (1,9–5,1) | 0,7–106,2 | 0 |
+| Vertical ≤ 30° | Bourke3 | 202 | 3,7 (2,4–5,6) | 2,5 | 2,4 (1,6–4,7) | 0,5–26,6 | 0 |
+| Vertical ≤ 30° | PIPTO (tempo real) | 781 | 14,1 (9,0–22,5) | 9,7 | 9,6 (6,5–15,7) | 2,1–117,7 | 0 |
 
-Referências publicadas (vida real/ADL contínuas): Bourke3 original 0,6/dia (Bourke 2010, via Bagalà); Bourke3 no Bagalà ≈ 5/dia; Kangas no Bagalà < 9/dia; faixa dos 13 algoritmos no Bagalà: 3–85 por 24 h.
+Referências publicadas (vida real/ADL contínuas): Bourke3 original 0,6 por dia acordado de 16,5 h = 0,04/h (Bourke 2010: 2 FP em 52,4 h diurnas de 10 idosos); Bourke3 no Bagalà ≈ 5/dia; Kangas no Bagalà < 9/dia; faixa dos 13 algoritmos no Bagalà: 3–85 por 24 h.
 
 ## Comparação entre algoritmos (mesmas pessoas: Wilcoxon pareado, correção de Holm)
 

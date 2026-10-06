@@ -61,12 +61,35 @@ Legenda: ✅ confere com o implementado · ⚠️ diverge ou exige ajuste no tex
 | Desempenho de referência na SisFall | — | limiar treinado na própria base com validação cruzada de 10 partes: C8 ≈ 96% de acurácia; no limiar de SE máxima (T2), SP cai para 33–68% | ✅ útil na Discussão |
 | Filtro | — | Butterworth de 4ª ordem a 5 Hz bastou; "a frequency sample of up to 11 Hz could be enough" | ✅ útil na Discussão |
 
-## Kangas 2008 e Bourke 2010 (PDFs ainda não obtidos)
+## Bourke 2010 (PDF lido em 06/10/2026)
+
+Bourke AK, van de Ven P, Gamble M, O'Connor R, Murphy K, Bogan E, McQuade E, Finucane P, ÓLaighin G, Nelson J. *Evaluation of waist-mounted tri-axial accelerometer based fall-detection algorithms during scripted and continuous unscripted activities.* J Biomech 2010;43(15):3051–3057. **doi:10.1016/j.jbiomech.2010.07.005** (confirmado).
+
+| Item | Implementado | No PDF | Status |
+|---|---|---|---|
+| UFT / LFT | 2,8 / 0,65 g | Tabela 1: idem | ✅ |
+| Bordas tFE / tRE | ≤ 600 / ≤ 350 ms | Tabela 1 e Fig. 2: idem; definições iguais às nossas | ✅ |
+| Limiar de velocidade | ≤ −0,7 m/s | Tabela 1: "VT 0.7 m/s" (o sinal negativo se perde na extração do PDF; o Bagalà dá −0,7) | ✅ |
+| **Cálculo da velocidade** | ∫(SV − 1 g) desde o último cruzamento de 1 g (máx. 1 s) | "numerical integration of the RSS signal with the magnitude of static acceleration (gravity) subtracted (Bourke et al., 2008a)". **A janela de integração continua sem descrição**: o texto remete a Bourke 2008a (anais do IEEE EMBC 2008) | ❓ **segue em aberto** |
+| Postura | ângulo com g_REF > 60° em mais de 75% de t+1..t+3 s | Eq. 1 e seção 2.3.3: idem | ✅ |
+| **Referência "em pé"** (g_REF) | média de 5 s em pé | "the average of the tri-axial accelerometer signal recorded when the sensor is attached and the subject is in a standing position for 5 s" (Fig. 3) | ✅ **é o método original** (antes estava marcado como adaptação) |
+| Como estimar g_SEG(t) | média móvel de 0,5 s | não descrito | ⚠️ continua adaptação |
+| Detecção do impacto no "Bourke3" | UFT + bordas (tFE **e** tRE) | O algoritmo VELOCITY+IMPACT+POSTURE foi testado com **4 formas de impacto, cada uma sozinha**: UFT, UFTD (RSSD ≥ 2,2 g), "Profile FE" (LFT + tFE + UFT) e "Profile RE" (LFT + tRE + UFT). As 4 deram o mesmo resultado | ⚠️ a nossa exige tFE **e** tRE juntas (mais restritiva). A variante `bourke3-noedge` (só UFT) corresponde à versão "UFT" do original |
+| Taxa de amostragem | 100 Hz | **200 Hz**, 12 bits, filtro analógico de 1ª ordem a 100 Hz | ⚠️ testado: a 200 Hz, SE 57,2% × 57,9% a 100 Hz (sem diferença prática) |
+| Sensor e posição | cintura | MMA7261QT, cinto, na crista ilíaca anterior direita, em capa de celular | ✅ |
+| **Como os limiares foram escolhidos** | — | "thresholds that ensure 100% sensitivity were obtained" a partir dos **picos mínimos das próprias quedas** (Figs. 4–5) | ⚠️ **SE de 100% é dentro da amostra** (ver Achado 32) |
+| Dados | — | 10 homens jovens, 240 quedas em colchão; 10 idosos (73–90 anos) com ADLs roteirizadas + 52,4 h diurnas não roteirizadas | ✅ |
+| **"0,6 FP/dia"** | comparado com "por 24 h" | **"dia" = 16,5 h acordado** (7,5 h de sono); 2 FP em 52,4 h = 0,04 FP/h | ⚠️ ajustar a comparação (ver Achado 35) |
+| Filtro do Kangas (RSSD) | Butterworth 2ª ordem, 0,25 Hz (Guardian) | "high-pass filtered … digital second-order Butterworth filter (fc = 0.25 Hz)", citando o Kangas 2008 | ✅ confirmado por fonte independente |
+
+## Kangas 2008 (PDF ainda não obtido)
 
 | Parâmetro | O que confirmar |
 |---|---|
-| Kangas: limiares de impacto (2,0 / 1,7 / 2,0 / 1,5 g) | Hoje vêm só do porte Guardian |
-| Kangas: filtro (Butterworth 0,25 Hz?) e taxa | Idem |
-| Bourke 2010: **janela de integração da velocidade** | É o que mais afeta o nosso resultado: o Bourke3 perde 466 quedas nesse estágio |
-| Bourke 2010: estimativa do vetor gravidade e taxa | Hoje é suposição nossa |
-| Bourke 2010: DOI | 10.1016/j.jbiomech.2010.07.005 (conferir) |
+| Limiares de impacto (2,0 / 1,7 / 2,0 / 1,5 g) | Hoje vêm do porte Guardian. O filtro de 0,25 Hz foi confirmado via Bourke 2010 |
+| Qual sinal é o 2a (o 2b é Z2) | Ou pela Tabela S1 do Bagalà |
+| Taxa original | — |
+
+## Bourke 2008a (novo, para fechar a velocidade)
+
+Bourke AK, O'Donovan KJ, Nelson J, ÓLaighin G. *Fall-detection through vertical velocity thresholding using a tri-axial accelerometer characterized using an optical motion-capture system.* Conf Proc IEEE EMBS 2008, Vancouver, pp. 2832–2835. É ele que descreve a janela de integração da velocidade.
