@@ -7,7 +7,7 @@ Legenda de status:
 - 🟡 **fonte secundária**: precisa ser conferido no PDF original (Etapa 1, `docs/parametros_conferidos.md`).
 - ⚠️ **adaptação nossa**: não está em nenhuma fonte; deve ser declarada no artigo.
 
-Fontes lidas durante a implementação:
+Fontes lidas durante a implementação (e, depois, os XML completos de Bagalà, PIPTO e SisFall; ver `parametros_conferidos.md`):
 - Bagalà et al. 2012, texto completo (cópia em `raw.githubusercontent.com/cstahmer/text_mining_with_r/.../0037062.txt`). Os símbolos matemáticos se perderam nessa cópia.
 - Porte Guardian do Kangas (`altermarkive/guardian/Detector.kt`, MIT).
 - Código oficial do PIPTO (`github.com/smoutsis/fall_detection_through_acceleration_data`, commit `c0f7aa2`), `python/def_fall.py` lido linha a linha. **O repositório não tem arquivo de licença**: por isso ele fica em `vendor/` (fora do git) e o porte TS é uma reimplementação para fins de pesquisa, com citação.
@@ -55,7 +55,7 @@ Reproduz o `SeniorScreen.tsx` original: `Accelerometer.setUpdateInterval(100)` e
 | Tempo da borda de descida | do último SV < LFT até SV > UFT, ≤ 600 ms | ✅ valor (Bagalà); ⚠️ direção "≤" |
 | Tempo da borda de subida | da última vez que SV passa LFT até SV > UFT, ≤ 350 ms | ✅ valor (Bagalà); ⚠️ direção "≤" |
 | Velocidade vertical | ≤ −0,7 m/s | ✅ Bagalà |
-| Cálculo da velocidade | mínimo de ∫(SV − 1 g)·9,80665·dt, do último cruzamento de 1 g para baixo antes do início da queda (no máximo 1 s antes do impacto) até o impacto. Variante `fixed-1s` para análise de sensibilidade | ⚠️ |
+| Cálculo da velocidade | mínimo de ∫(SV − 1 g)·9,80665·dt, do último cruzamento de 1 g para baixo antes do início da queda (no máximo 1 s antes do impacto) até o impacto. Variante `fixed-1s` para análise de sensibilidade | ⚠️ (Bagalà: "numerical integration of the SV signal with the gravity component subtracted"; a janela não é descrita) |
 | Postura | ângulo entre o vetor gravidade atual (média móvel de 0,5 s ⚠️) e a referência em pé > 60° em mais de 75% das amostras de t+1 s a t+3 s | ✅ Bagalà |
 | Taxa | 100 Hz | ⚠️ (Bagalà: "50 a 250 Hz") |
 | Refratário | novos cruzamentos de UFT são ignorados até t+3 s (candidato aceito) ou t+0,5 s (rejeitado) | ⚠️ |
@@ -74,7 +74,7 @@ O Bagalà relata para o original **0,6 falso positivo/dia** e SE = SP = 100% em 
 | `sub_1` | 50 | 0,5 s para separar grupos de extremos | ✅ |
 | `fall_duration` | 105 | 1,05 s entre queda livre e impacto | ✅ |
 | `fall_limitation` | 85 | 0,85 s | ✅ |
-| `dist_1`, `dist_2` | 100 | **sem efeito**, ver o comportamento 2 abaixo | ✅ |
+| `dist_1`, `dist_2` | 100 | **sem efeito no código**, ver o comportamento 2 abaixo. O artigo (Tabela 1) as descreve como a janela antes/depois da queda onde procurar picos: o código de referência diverge do texto | ✅ código / ⚠️ texto |
 | Repouso pós-queda | média em (g−2, g+2), desvio padrão < 2, mais de 20 amostras | | ✅ |
 
 **Comportamentos não óbvios do original, mantidos no porte** (marcados `QUIRK` no código):

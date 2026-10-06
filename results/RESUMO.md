@@ -1,7 +1,7 @@
 # Resumo dos resultados: SisFall (simulação de celular)
 
 Base e condição:
-- **Base:** SisFall, espelho CSV, com **4396 tentativas**: 1744 quedas (F01–F15) e 2652 ADLs (D01–D19).
+- **Base:** SisFall, espelho CSV, com **4396 tentativas**: 1744 quedas (F01–F15) e 2652 ADLs (D01–D19). O artigo da SisFall descreve 4510; faltam 114 no espelho.
 - **Participantes:** 23 jovens (SA) e 15 idosos (SE). Entre os idosos, só o SE06 tem quedas.
 - **Sinal:** canal ADXL345, sensor na cintura.
 - **Simulação do celular:**
@@ -20,10 +20,10 @@ Detalhes por atividade e funil de cada variante: `sisfall_<variante>.md`. Linhas
 | Algoritmo | Publicado (SE / SP / FP) | Bagalà 2012 (quedas reais) | SisFall, esta reimplementação: SE % (IC95) | SP % (IC95) | F1 % |
 |---|---|---|---|---|---|
 | **A0 Mova legado** (\|a\| > 2,5 g, 10 Hz) | — | — | 67,5 (65,3–69,7) | 82,2 (80,7–83,6) | 69,4 |
-| **A1 Kangas** (faithful, 4 sinais em OU) | SE 76–97%, SP 100% (lab) 🟡 | SE < 55%, < 9 alarmes falsos/dia | **92,9** (91,6–94,0) | **98,6** (98,0–99,0) | **95,2** |
+| **A1 Kangas** (faithful, 4 sinais em OU) | SE 76–97%, SP 100% (lab, cintura) ✅ | SE < 55%, < 9 alarmes falsos/dia | **92,9** (91,6–94,0) | **98,6** (98,0–99,0) | **95,2** |
 | A1 Kangas (postura do Guardian: eixo z) | — | — | 30,0 (27,9–32,2) | 98,0 (97,4–98,5) | 45,1 |
-| **A2 Bourke3** | SE 100%, SP 100%, 0,6 FP/dia 🟡 | SE 82,8%, SP 96,7%, ~5 alarmes falsos/dia | 57,9 (55,6–60,2) | **99,8** (99,5–99,9) | 73,2 |
-| **A3 PIPTO** (original, gravação inteira) | acurácia > 97% na SisFall 🟡 | — | 80,9 (79,0–82,7) | 88,6 (87,3–89,7) | 81,6 |
+| **A2 Bourke3** | SE 100%, SP 100%, 0,6 FP/dia ✅ | SE 82,8%, SP 96,7%, ~5 alarmes falsos/dia | 57,9 (55,6–60,2) | **99,8** (99,5–99,9) | 73,2 |
+| **A3 PIPTO** (original, gravação inteira) | KFall: SE 91,6%, SP 85,9% ✅ (não foi avaliado na SisFall) | — | 80,9 (79,0–82,7) | 88,6 (87,3–89,7) | 81,6 |
 | A3 PIPTO (adaptação para tempo real) | — | — | 84,3 (82,5–85,9) | 82,4 (80,9–83,8) | 79,8 |
 
 Variantes para análise de sensibilidade:
@@ -48,6 +48,8 @@ Variantes para análise de sensibilidade:
 | PIPTO (tempo real) | 85,6 | 76,4 | 54,7 | 94,2 |
 
 Todos os algoritmos detectam **menos** as quedas do único idoso que caiu (SE06) do que as dos jovens. Com n = 75, o intervalo é largo.
+
+A SP alta no grupo SE também tem outro motivo: por recomendação médica, os idosos **não** fizeram D06, D13, D18 e D19, justamente as ADLs que mais enganam os detectores.
 
 ## Funil por estágio: qual fase elimina os falsos positivos
 
@@ -74,11 +76,11 @@ O que o funil mostra:
 | PIPTO (original) | D18 77%, D19 63%, D11 39%, D06 13%, D08 13% |
 | PIPTO (tempo real) | D06 95%, D04 94%, D03 74%, D18 77%, D19 73%, D11 39% |
 
-Códigos da SisFall (🟡 conferir na Tabela 1 do artigo):
+Códigos da SisFall (conferidos nas Tabelas 1 e 2 do artigo):
 - D03/D04: correr devagar/rápido.
 - D06: subir e descer escada rápido.
 - D11: tentar levantar e desabar na cadeira.
-- D13: deitar rápido.
+- D13: sentar, deitar rápido, esperar e sentar de novo.
 - D14: de costas, virar de lado e voltar.
 - D18: tropeçar andando.
 - D19: pular de leve.
@@ -97,13 +99,29 @@ O porte TS (`src/detection/pipto.ts`) foi comparado com o `def_fall.py` original
 | 50 Hz, ±8 g (sinal do replay) | **4396 / 4396** | 80,9 / 88,6 | 80,9 / 88,6 |
 | 200 Hz nativo, sem saturação | **4396 / 4396** | 81,3 / 86,9 | 81,3 / 86,9 |
 
-O porte é equivalente ao original. Mesmo a 200 Hz, a taxa nativa da SisFall, o original **não** chega à acurácia de > 97% relatada pelos autores nessa base.
+O porte é equivalente ao original.
+
+**Comparação com o publicado.** O artigo do PIPTO **não avalia na SisFall**: a validação usa UR e KFall, e o teste usa MMsys e KFall. O número "> 97% na SisFall" do pipeline vinha de uma fonte secundária e estava errado. A comparação justa é com a **KFall**, que repete o protocolo de atividades da SisFall (sensor na lombar, 100 Hz):
+
+| | Autores (KFall, teste) | Nós (SisFall, código original, 50 Hz) |
+|---|---|---|
+| Sensibilidade | 91,6% | 80,9% |
+| Especificidade | 85,9% | 88,6% |
+| "Pular de leve" (D19), % de alarmes falsos | 82,5% | 62,9% |
+| "Tentar levantar e desabar na cadeira" (D11) | 69,2% | 38,5% |
+| "Tropeçar andando" (D18) | 49,6% | 76,9% |
+| "Queda correndo por tropeço" (F05), % detectadas | 38,4% | 37,8% |
+
+O desempenho é da mesma ordem e as atividades que enganam o algoritmo são **as mesmas**. A F05 dá praticamente o mesmo número nas duas bases. A sensibilidade fica cerca de 10 pontos abaixo da relatada. Três coisas diferem entre os estudos:
+- **Base:** KFall × SisFall.
+- **Pontuação:** os autores contam cada detecção extra numa série como FP adicional; nós pontuamos por arquivo.
+- **Distribuição:** os autores escolheram os limiares com 20% da própria KFall.
 
 ## Comparação com o publicado (o que dizer no artigo)
 
 1. **Kangas** se saiu **melhor** na SisFall (SE 93%) do que no Bagalà (< 55% em quedas reais), e dentro da faixa do laboratório original (76–97%). A SisFall tem quedas simuladas por jovens, que terminam deitados; nas quedas reais, o idoso muitas vezes não fica deitado (Bagalà: "The LPF vertical signal rarely reaches values under 0.5 g").
 2. **Bourke3** manteve a especificidade altíssima (99,8%), mas a sensibilidade **caiu muito**: 58% contra 100% no original e 83% no Bagalà. A causa é o limiar de velocidade, e nossa forma de calcular a velocidade é uma adaptação ⚠️, porque o método do original não foi confirmado. É candidato número um à conferência no PDF (Etapa 1).
-3. **PIPTO** ficou bem abaixo da acurácia reportada na SisFall (> 97%): SE 81%, SP 89% a 50 Hz. Com o **código original dos autores a 200 Hz**, o resultado é SE 81%, SP 87%, ou seja, a queda de desempenho não vem do porte nem da decimação. A adaptação para tempo real piora a especificidade (82%). Uma diferença possível é o protocolo de pontuação dos autores, que deve ser conferido no artigo.
+3. **PIPTO** teve SE 81% e SP 89% na SisFall (a 50 Hz), contra SE 91,6% e SP 85,9% relatados pelos autores na KFall. O padrão de erros por atividade é o mesmo. Com o **código original dos autores a 200 Hz**, o resultado foi praticamente igual (SE 81%, SP 87%), então a diferença não vem do porte nem da decimação. A adaptação para tempo real piora a especificidade (82%). Achado à parte: o código de referência não usa `dist_1`/`dist_2` como o artigo descreve.
 4. **A postura sozinha não é suficiente no celular:** o modo Guardian (eixo z) derruba a SE para 30% na SisFall, porque a orientação do sensor é outra. Isso antecipa o problema do celular no bolso.
 5. **O detector antigo do Mova** tem SP de 82% e 46 alarmes por hora de ADL roteirizada. Isso justifica a troca.
 
