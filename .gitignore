@@ -39,3 +39,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# estudo de quedas: bases baixadas, caches e código de terceiros sem licença declarada
+/data/
+/vendor/
+results/_*.log

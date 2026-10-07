@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import SeniorScreen from "./src/screens/SeniorScreen";
 import CaregiverScreen from "./src/screens/CaregiverScreen";
+import RecorderScreen from "./src/screens/RecorderScreen";
 import { UserRole } from "./src/types";
 import { syncService } from "./src/services/syncService";
 import { notificationService } from "./src/services/notificationService";
@@ -41,6 +42,8 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState<OnboardingStep>("circle");
   const [role, setRole] = useState<UserRole | null>(null);
+  // Modo estudo de quedas (coleta para o artigo), fora do fluxo do Círculo
+  const [studyMode, setStudyMode] = useState(false);
 
   // Passo 1 — Círculo
   const [circleMode, setCircleMode] = useState<"create" | "join" | null>(null);
@@ -235,6 +238,10 @@ export default function App() {
     );
   }
 
+  if (studyMode) {
+    return <RecorderScreen onExit={() => setStudyMode(false)} />;
+  }
+
   // ─── TELA PRINCIPAL (APÓS CONEXÃO) ──────────────────────────────────────────
   if (step === "done") {
     if (role === "caregiver") {
@@ -342,6 +349,10 @@ export default function App() {
                       </Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.4)" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => setStudyMode(true)} style={{ alignItems: "center", padding: 8 }}>
+                    <Text style={styles.bigOptionSub}>Modo estudo: coleta de quedas</Text>
                   </TouchableOpacity>
                 </View>
               )}
