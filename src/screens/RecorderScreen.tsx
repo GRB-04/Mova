@@ -285,6 +285,8 @@ export default function RecorderScreen({ onExit }: { onExit: () => void }) {
         activity: tr.activity,
         kind: w.kind,
         durationS: tEnd - tr.tStart,
+        tStart: tr.tStart,
+        tEnd,
         hit,
         nAlarms,
       };
