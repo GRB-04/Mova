@@ -46,6 +46,9 @@ export type TrialRecord = {
   activity: string;
   kind: TrialKind;
   durationS: number;
+  /** início/fim da tentativa no relógio do sensor (s). Ausentes nas tentativas antigas: ver trialSpan() em signal.ts. */
+  tStart?: number;
+  tEnd?: number;
   /** por detector: houve acerto (queda) / alarme falso (ADL) */
   hit: Record<string, boolean>;
   /** por detector: nº de alarmes dentro da tentativa */

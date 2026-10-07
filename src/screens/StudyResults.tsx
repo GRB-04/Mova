@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { DetectorSummary, Rate, TrialRecord, byActivity, summarize, trialsToCsv } from "../study/scoring";
 import { clearTrials, deleteTrial, loadTrials } from "../study/trialStore";
 import { meta } from "../study/detectorsMeta";
+import SignalChart from "./SignalChart";
 
 function formatDuration(s: number): string {
   if (s < 90) return `${Math.round(s)} s`;
@@ -202,6 +203,7 @@ export default function StudyResults({ detectors, refreshKey }: { detectors: str
 
 /** Resultado de uma tentativa: ✓/✗ por detector, já interpretado (verde = acertou). */
 export function TrialCard({ trial, detectors, onDelete }: { trial: TrialRecord; detectors: string[]; onDelete?: () => void }) {
+  const [showSignal, setShowSignal] = useState(false);
   return (
     <View style={styles.card}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -215,6 +217,7 @@ export function TrialCard({ trial, detectors, onDelete }: { trial: TrialRecord; 
       <Text style={styles.cardHint}>
         {trial.volunteer} · {trial.position} · {formatDuration(trial.durationS)} · {new Date(trial.createdAt).toLocaleString()}
       </Text>
+      <Text style={styles.cardHint}>Sessão {trial.sessionId}</Text>
       {detectors.map((d) => {
         const alarmed = trial.hit[d];
         const n = trial.nAlarms[d] ?? 0;
@@ -238,6 +241,11 @@ export function TrialCard({ trial, detectors, onDelete }: { trial: TrialRecord; 
           </View>
         );
       })}
+      <TouchableOpacity style={styles.signalBtn} onPress={() => setShowSignal(!showSignal)}>
+        <Ionicons name="pulse-outline" size={16} color="#4ECDC4" />
+        <Text style={styles.secondaryText}>{showSignal ? "Esconder" : "Ver"} sinal do sensor</Text>
+      </TouchableOpacity>
+      {showSignal && <SignalChart trial={trial} detectors={detectors} />}
     </View>
   );
 }
@@ -272,4 +280,5 @@ const styles = StyleSheet.create({
   resultRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   resultLabel: { color: "#F8FAFC", fontSize: 13, width: 110 },
   resultText: { fontSize: 13, flex: 1 },
+  signalBtn: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingVertical: 6 },
 });
